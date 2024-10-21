@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.SQLite;
 using System.IO;
 using System.Text.RegularExpressions;
+using MySqlConnector;
 
 namespace ksiazkaZDanymi
 {
@@ -13,9 +14,9 @@ namespace ksiazkaZDanymi
 
         private string databaseName;
 
-        private SQLiteConnection connection;
+        private MySqlConnection connection;
 
-        private SQLiteCommand commandHolder;
+        private MySqlCommand commandHolder;
 
         private List<Person> personsList = new List<Person>();
 
@@ -41,43 +42,33 @@ namespace ksiazkaZDanymi
         {
             try
             {
-                path = Path.GetFullPath(Path.Combine("..", "..", "..", databaseName));
-
-                if (!File.Exists(path))
-                {
-                    SQLiteConnection.CreateFile(path);
-                    Console.WriteLine($"Database file '{databaseName}' created at: {path}");
-
-                    connection = new SQLiteConnection($"Data Source={path};Version=3;");
-                    connection.Open();
-
-                    string createTableQuery = @"
-                    CREATE TABLE IF NOT EXISTS Persons (
-                    person_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    surname TEXT NOT NULL,
-                    phone_number TEXT NOT NULL,
-                    mail TEXT NOT NULL,
-                    date_of_birth TEXT NOT NULL
-                    );";
-
-                    commandHolder = new SQLiteCommand(createTableQuery, connection);
-                    commandHolder.ExecuteNonQuery();
-                    Console.WriteLine("Table 'Persons' created successfully. \nPress any button to continue.");
-                    Console.ReadKey();
-                }
-                else
-                {
-                    connection = new SQLiteConnection($"Data Source={path};Version=3;");
-                    connection.Open();
-                }
+                connection = new MySqlConnection("Database=test;Server=localhost;user=root;password=");
+                connection.Open();
 
                 commandHolder = connection.CreateCommand();
+
+                commandHolder.CommandText = "CREATE DATABASE IF NOT EXISTS PhoneBook";
+                commandHolder.ExecuteNonQuery();
+
+                commandHolder.CommandText = "USE PhoneBook";
+                commandHolder.ExecuteNonQuery();
+
+                commandHolder.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Persons (
+                    person_id INT AUTO_INCREMENT PRIMARY KEY,
+                    name TEXT,
+                    surname TEXT,
+                    phone_number VARCHAR(12),
+                    mail TEXT,
+                    date_of_birth TEXT
+                )";
+                commandHolder.ExecuteNonQuery();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new Exception("Problem ocurred while creating connection with database.");
+                throw new Exception("Problem ocurred while creating connection with database: " + ex.Message);
             }
+
         }
 
         private void FetchPersonsFromDatabase(string orderBy = null)
@@ -132,15 +123,20 @@ namespace ksiazkaZDanymi
                     List<string> columns = new List<string>();
 
 
-                    commandHolder.Reset();
-                    commandHolder.CommandText = "PRAGMA table_info(Persons)";
+                    commandHolder.Parameters.Clear();
+                    commandHolder.CommandText = @"
+                    SELECT COLUMN_NAME 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = 'PhoneBook' 
+                    AND TABLE_NAME = 'Persons'";
                     var reader = commandHolder.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        columns.Add(reader["name"].ToString());
+                        columns.Add(reader["COLUMN_NAME"].ToString());
                     }
 
+                    reader.Close();
 
                     while (true)
                     {
@@ -175,10 +171,10 @@ namespace ksiazkaZDanymi
                                 selectedOption = selectedOption - 1 < 0 ? columns.Count - 1 : selectedOption - 1;
                                 continue;
                             case ConsoleKey.Enter:
-                                commandHolder.Reset();
+                                commandHolder.Parameters.Clear();
                                 break;
                             default:
-                                commandHolder.Reset();
+                                commandHolder.Parameters.Clear();
                                 Console.Clear();
                                 return;
                         }
@@ -316,7 +312,7 @@ namespace ksiazkaZDanymi
                             continue;
                         case ConsoleKey.Enter:
                             Console.Clear();
-                            commandHolder.Reset();
+                            commandHolder.Parameters.Clear();
 
                             return personsList[selectedPerson].ID;
                         default:
@@ -460,7 +456,7 @@ namespace ksiazkaZDanymi
                 Console.ReadKey();
                 Console.Clear();
 
-                commandHolder.Reset();
+                commandHolder.Parameters.Clear();
             }
         }
 
@@ -489,7 +485,7 @@ namespace ksiazkaZDanymi
 
                     if (personToDelete == -1)
                     {
-                        commandHolder.Reset();
+                        commandHolder.Parameters.Clear();
                         Console.Clear();
                         return;
                     }
@@ -546,14 +542,14 @@ namespace ksiazkaZDanymi
                                 }
                                 else
                                 {
-                                    commandHolder.Reset();
+                                    commandHolder.Parameters.Clear();
                                     Console.Clear();
                                     return;
                                 }
 
                                 break;
                             default:
-                                commandHolder.Reset();
+                                commandHolder.Parameters.Clear();
                                 Console.Clear();
                                 return;
                         }
@@ -563,7 +559,7 @@ namespace ksiazkaZDanymi
 
                     Console.WriteLine("User deleted. Do you want to delete another? Press Y for Yes, any other key to exit.");
 
-                    commandHolder.Reset();
+                    commandHolder.Parameters.Clear();
 
                     if (Console.ReadKey().Key != ConsoleKey.Y)
                     {
@@ -613,7 +609,7 @@ namespace ksiazkaZDanymi
 
                     if (personToModify == -1)
                     {
-                        commandHolder.Reset();
+                        commandHolder.Parameters.Clear();
                         Console.Clear();
                         return;
                     }
@@ -679,14 +675,14 @@ namespace ksiazkaZDanymi
                                 }
                                 else
                                 {
-                                    commandHolder.Reset();
+                                    commandHolder.Parameters.Clear();
                                     Console.Clear();
                                     return;
                                 }
 
                                 break;
                             default:
-                                commandHolder.Reset();
+                                commandHolder.Parameters.Clear();
                                 Console.Clear();
                                 return;
                         }
@@ -696,7 +692,7 @@ namespace ksiazkaZDanymi
 
                     Console.WriteLine("User modified. Do you want to modify another person data? Press Y for Yes, any other key to exit.");
 
-                    commandHolder.Reset();
+                    commandHolder.Parameters.Clear();
 
                     if (Console.ReadKey().Key != ConsoleKey.Y)
                     {
@@ -737,7 +733,7 @@ namespace ksiazkaZDanymi
                     while (true)
                     {
                         Console.Clear();
-                        Console.WriteLine("Welcome to the program 'Phone Book'. \nThis is simple utility working on MySQLite which provides methods to perform particular operations on records concerned persons in database.");
+                        Console.WriteLine("Welcome to the program 'Phone Book'. \nThis is simple utility working on MariaDB which provides methods to perform particular operations on records concerned persons in database.");
                         Console.WriteLine("Choose what you want to do by selecting option from the list below.");
                         Console.WriteLine("Use {↑ and ↓} to change selected option, ENTER to choose.");
                         Console.WriteLine();
