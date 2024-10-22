@@ -1,18 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\",
+  "WorkspaceRootPath": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|c:\\users\\4tpjakub_uryga\\desktop\\phone-book-main\\phonebook\\phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|c:\\users\\uryga\\documents\\github\\phone-book-mariadb\\phonebook\\phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,13 +26,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Program.cs",
               "RelativeDocumentMoniker": "phoneBook\\Program.cs",
-              "ToolTip": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\Program.cs",
+              "ToolTip": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Program.cs",
               "RelativeToolTip": "phoneBook\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-10T07:19:22.317Z",
               "EditorCaption": ""
@@ -41,27 +41,26 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "PhoneBook.cs",
-              "DocumentMoniker": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\PhoneBook.cs",
+              "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\PhoneBook.cs",
               "RelativeDocumentMoniker": "phoneBook\\PhoneBook.cs",
-              "ToolTip": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\PhoneBook.cs",
+              "ToolTip": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\PhoneBook.cs",
               "RelativeToolTip": "phoneBook\\PhoneBook.cs",
-              "ViewState": "AgIAAFgCAAAAAAAAAAAmwHICAAA6AAAAAAAAAA==",
+              "ViewState": "AgIAAJ4AAAAAAAAAAAAwwLEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-10T07:19:21.909Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Person.cs",
-              "DocumentMoniker": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\Person.cs",
+              "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Person.cs",
               "RelativeDocumentMoniker": "phoneBook\\Person.cs",
-              "ToolTip": "C:\\Users\\4tpJakub_Uryga\\Desktop\\phone-book-main\\phoneBook\\phoneBook\\Person.cs",
+              "ToolTip": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Person.cs",
               "RelativeToolTip": "phoneBook\\Person.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-10T07:19:20.943Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-10T07:19:20.943Z"
             }
           ]
         }

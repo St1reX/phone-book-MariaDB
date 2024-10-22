@@ -59,6 +59,6 @@ C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\bin\Debug
 C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.csproj.AssemblyReference.cache
 C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.csproj.CoreCompileInputs.cache
-C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.csproj.CopyComplete
 C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.exe
 C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.pdb
+C:\Users\uryga\Documents\GitHub\phone-book-MariaDB\phoneBook\phoneBook\obj\Debug\phoneBook.csproj.Up2Date

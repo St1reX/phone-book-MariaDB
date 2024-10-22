@@ -10,8 +10,6 @@ namespace ksiazkaZDanymi
 {
     internal class PhoneBook
     {
-        private string path;
-
         private string databaseName;
 
         private MySqlConnection connection;
@@ -19,6 +17,8 @@ namespace ksiazkaZDanymi
         private MySqlCommand commandHolder;
 
         private List<Person> personsList = new List<Person>();
+
+        private int recordsAmount;
 
         public PhoneBook(string databaseName)
         {
@@ -38,19 +38,272 @@ namespace ksiazkaZDanymi
 
         }
 
+        //HELPER FUNCTIONS
+        private int SelectFromListMembers(int elementsAmount = 4)
+        {
+            Console.Clear();
+
+            ConsoleKey actionKey;
+
+            int index = 1;
+
+            int selectedPerson = 0;
+
+
+            try
+            {
+                FetchPersonsFromDatabase(elementsAmount, 0);
+
+                while (true)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Use {← and →} to navigate between sites and {↑ and ↓} to change selected user.\n Press ESC to exit.");
+
+                    for (int i = 0; i < personsList.Count; i++)
+                    {
+
+                        if (i == selectedPerson)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+
+                            Console.WriteLine(
+                            $"{personsList[i].ID}. {{ \n \t" +
+                            $"Name: {personsList[i].Name} \n \t" +
+                            $"Surname: {personsList[i].Surname} \n \t" +
+                            $"Phone Number: {personsList[i].PhoneNumber} \n \t" +
+                            $"Mail: {personsList[i].Email} \n \t" +
+                            $"Date of Birth: {personsList[i].DateOfBirth} \n" +
+                            $"}}");
+
+                            Console.ResetColor();
+                            continue;
+                        }
+
+                        Console.WriteLine(
+                        $"{personsList[i].ID}. {{ \n \t" +
+                        $"Name: {personsList[i].Name} \n \t" +
+                        $"Surname: {personsList[i].Surname} \n \t" +
+                        $"Phone Number: {personsList[i].PhoneNumber} \n \t" +
+                        $"Mail: {personsList[i].Email} \n \t" +
+                        $"Date of Birth: {personsList[i].DateOfBirth} \n" +
+                        $"}}");
+
+                    }
+
+                    actionKey = Console.ReadKey().Key;
+
+                    switch (actionKey)
+                    {
+                        case ConsoleKey.RightArrow:
+                            index = index + 1 > Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) ? 1 : index + 1;
+                            selectedPerson = 0;
+
+                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
+                            continue;
+                        case ConsoleKey.LeftArrow:
+                            index = index - 1 < 1 ? (int)Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) : index - 1;
+                            selectedPerson = 0;
+
+                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
+                            continue;
+                        case ConsoleKey.UpArrow:
+                            selectedPerson = selectedPerson - 1 < 0 ? personsList.Count - 1 : selectedPerson - 1;
+                            continue;
+                        case ConsoleKey.DownArrow:
+                            selectedPerson = selectedPerson + 1 >= personsList.Count ? 0 : selectedPerson + 1;
+                            if (selectedPerson > personsList.Count)
+                            {
+                                selectedPerson = personsList.Count - 1;
+                            }
+                            continue;
+                        case ConsoleKey.Enter:
+                            Console.Clear();
+                            commandHolder.Parameters.Clear();
+
+                            return personsList[selectedPerson].ID;
+                        case ConsoleKey.Escape:
+                            return -1;
+                        default:
+                            continue;
+                    }
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                Console.Clear();
+            }
+
+        }
+        private int SelectFromGivenOptions(List<string> options, List<string> communicates)
+        {
+            int selectedOption = 0;
+            ConsoleKey actionKey;
+
+            communicates.Add("Use {↑ and ↓} to change selected option, ENTER to choose.");
+            communicates.Add("Press ESC to exit.");
+            communicates.Add("\n");
+
+            while (true)
+            {
+                Console.Clear();
+
+                foreach (var communicate in communicates)
+                {
+                    Console.WriteLine(communicate);
+                }
+
+
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (i == selectedOption)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+
+                        Console.WriteLine(" > " + options[i]);
+
+                        Console.ResetColor();
+                        continue;
+                    }
+
+                    Console.WriteLine(options[i]);
+                }
+
+                actionKey = Console.ReadKey().Key;
+
+                Console.Clear();
+
+                switch (actionKey)
+                {
+                    case ConsoleKey.DownArrow:
+                        selectedOption = selectedOption + 1 >= options.Count ? 0 : selectedOption + 1;
+                        continue;
+                    case ConsoleKey.UpArrow:
+                        selectedOption = selectedOption - 1 < 0 ? options.Count - 1 : selectedOption - 1;
+                        continue;
+                    case ConsoleKey.Enter:
+                        return selectedOption;
+                    case ConsoleKey.Escape:
+                        return -1;
+                    default:
+                        continue;
+                }
+            }
+        }
+        private Dictionary<string, string> GetValidatedUserInput()
+        {
+            Dictionary<string, string> userInputs = new Dictionary<string, string>();
+
+            string nameSurnameValidationPattern = @"^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$";
+            Regex nameSurnameValidation = new Regex(nameSurnameValidationPattern);
+
+            string dateValidationPattern = @"^(19\d{2}|20[01]\d|202[0-4])[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])$";
+            Regex dateValidation = new Regex(dateValidationPattern);
+
+            string phoneNumberValidationPattern = @"^\d{9}$|^\d{3}-\d{3}-\d{3}$";
+            Regex phoneNumberValidation = new Regex(phoneNumberValidationPattern);
+
+            while (true)
+            {
+                try
+                {
+                    if (!userInputs.ContainsKey("name"))
+                    {
+                        Console.WriteLine("Enter new user name: ");
+                        userInputs["name"] = Console.ReadLine();
+                        if (!nameSurnameValidation.IsMatch(userInputs["name"]))
+                        {
+                            userInputs.Remove("name");
+                            throw new ValidationException("Field 'name' must be a correctly provided string. Only letters are allowed.");
+                        }
+                    }
+
+                    if (!userInputs.ContainsKey("surname"))
+                    {
+                        Console.WriteLine("Enter new user surname: ");
+                        userInputs["surname"] = Console.ReadLine();
+                        if (!nameSurnameValidation.IsMatch(userInputs["surname"]))
+                        {
+                            userInputs.Remove("surname");
+                            throw new ValidationException("Field 'surname' must be a correctly provided string. Only letters are allowed.");
+                        }
+                    }
+
+                    if (!userInputs.ContainsKey("phone_number"))
+                    {
+                        Console.WriteLine("Enter new user phone number (eg. 222-222-222): ");
+                        userInputs["phone_number"] = Console.ReadLine();
+                        if (!phoneNumberValidation.IsMatch(userInputs["phone_number"]))
+                        {
+                            userInputs.Remove("phone_number");
+                            throw new ValidationException("Field 'phone_number' must be a correctly provided string. Only numbers and separators ('-') are allowed, maximum length = 9 or 12.");
+                        }
+                    }
+
+                    if (!userInputs.ContainsKey("mail"))
+                    {
+                        Console.WriteLine("Enter new user mail: ");
+                        userInputs["mail"] = Console.ReadLine();
+                        if (!new EmailAddressAttribute().IsValid(userInputs["mail"]))
+                        {
+                            userInputs.Remove("mail");
+                            throw new ValidationException("Field 'mail' must be a correctly provided mail format.");
+                        }
+                    }
+
+                    if (!userInputs.ContainsKey("date_of_birth"))
+                    {
+                        Console.WriteLine("Enter new user birth date (eg. 2012-02-12): ");
+                        userInputs["date_of_birth"] = Console.ReadLine();
+                        if (!dateValidation.IsMatch(userInputs["date_of_birth"]))
+                        {
+                            userInputs.Remove("date_of_birth");
+                            throw new ValidationException("Field 'dateOfBirth' must be a correctly provided date format eg. (YYYY-MM-DD or YYYY/MM/DD).");
+                        }
+                    }
+
+                    break;
+                }
+                catch (ValidationException ex)
+                {
+                    Console.WriteLine("Some provided data are incorrect: " + ex.Message);
+                    Console.WriteLine("Enter this field again.");
+                    Console.WriteLine("Press any button to continue.");
+                    Console.ReadKey();
+                    Console.Clear();
+                    continue;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+
+            return userInputs;
+        }
+
+
+        //BASIC FUNCTIONS
         private void CreateDatabaseConnection()
         {
             try
             {
-                connection = new MySqlConnection("Database=test;Server=localhost;user=root;password=");
+                connection = new MySqlConnection("Database=mysql;Server=localhost;user=root;password=");
                 connection.Open();
 
                 commandHolder = connection.CreateCommand();
 
-                commandHolder.CommandText = "CREATE DATABASE IF NOT EXISTS PhoneBook";
+                commandHolder.CommandText = $"CREATE DATABASE IF NOT EXISTS {databaseName}";
                 commandHolder.ExecuteNonQuery();
 
-                commandHolder.CommandText = "USE PhoneBook";
+                commandHolder.CommandText = $"USE {databaseName}";
                 commandHolder.ExecuteNonQuery();
 
                 commandHolder.CommandText = @"
@@ -63,6 +316,11 @@ namespace ksiazkaZDanymi
                     date_of_birth TEXT
                 )";
                 commandHolder.ExecuteNonQuery();
+
+                commandHolder.CommandText = "SELECT COUNT(*) FROM Persons";
+                recordsAmount = System.Convert.ToInt32(commandHolder.ExecuteScalar());
+
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
             }
             catch (Exception ex)
             {
@@ -70,14 +328,14 @@ namespace ksiazkaZDanymi
             }
 
         }
-
-        private void FetchPersonsFromDatabase(string orderBy = null)
+        private void FetchPersonsFromDatabase(int limit, int offset, string orderBy = null)
         {
             try
             {
                 personsList.Clear();
 
-                commandHolder.CommandText = orderBy == null ? "SELECT * FROM Persons" : $"SELECT * FROM Persons ORDER BY {orderBy}";
+                commandHolder.CommandText = orderBy == null ? $"SELECT * FROM Persons " : $"SELECT * FROM Persons ORDER BY {orderBy} ";
+                commandHolder.CommandText += $"LIMIT {limit} OFFSET {offset}";
                 var reader = commandHolder.ExecuteReader();
 
                 while (reader.Read())
@@ -104,10 +362,12 @@ namespace ksiazkaZDanymi
                 throw new InvalidOperationException("Table Persons in database are empty. No elements to select/display. You need to add at least one user before using this function.");
             }
         }
-
         private void DisplayListMembers(bool displaySorted = false, int elementsAmount = 4)
         {
             Console.Clear();
+
+            List<string> columns = new List<string>();
+            int selectedOption = 0;
 
             ConsoleKey actionKey;
 
@@ -115,25 +375,18 @@ namespace ksiazkaZDanymi
 
             try
             {
+                FetchPersonsFromDatabase(elementsAmount, 0);
 
                 if (displaySorted == true)
                 {
-                    int selectedOption = 0;
-
-                    List<string> columns = new List<string>();
-
 
                     commandHolder.Parameters.Clear();
-                    commandHolder.CommandText = @"
-                    SELECT COLUMN_NAME 
-                    FROM INFORMATION_SCHEMA.COLUMNS 
-                    WHERE TABLE_SCHEMA = 'PhoneBook' 
-                    AND TABLE_NAME = 'Persons'";
+                    commandHolder.CommandText = "SHOW COLUMNS FROM Persons";
                     var reader = commandHolder.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        columns.Add(reader["COLUMN_NAME"].ToString());
+                        columns.Add(reader["Field"].ToString());
                     }
 
                     reader.Close();
@@ -181,21 +434,14 @@ namespace ksiazkaZDanymi
 
                         break;
                     }
-
-                    FetchPersonsFromDatabase(columns[selectedOption]);
-                }
-                else
-                {
-                    FetchPersonsFromDatabase();
                 }
 
-                do
+                while (true)
                 {
                     Console.Clear();
+                    Console.WriteLine("Use {← and →} to navigate between pages. \nPress ESC to exit.");
 
-                    Console.WriteLine("Use {← and →} to navigate between pages. \nPress any other key to exit.");
-
-                    for (int i = (index - 1) * elementsAmount; i < index * elementsAmount && i < personsList.Count; i++)
+                    for (int i = 0; i < personsList.Count; i++)
                     {
                         Console.WriteLine(
                         $"{personsList[i].ID}. {{ \n \t" +
@@ -209,17 +455,30 @@ namespace ksiazkaZDanymi
 
                     actionKey = Console.ReadKey().Key;
 
-                    if (actionKey == ConsoleKey.RightArrow)
+                    switch (actionKey)
                     {
-                        index = index + 1 > Math.Ceiling(personsList.Count / System.Convert.ToDecimal(elementsAmount)) ? 1 : index + 1;
+                        case ConsoleKey.RightArrow:
+                            index = index + 1 > Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) ? 1 : index + 1;
+                            break;
+                        case ConsoleKey.LeftArrow:
+                            index = index - 1 < 1 ? (int)Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) : index - 1;
+                            break;
+                        case ConsoleKey.Escape:
+                            return;
+                        default:
+                            continue;
+
                     }
-                    else if (actionKey == ConsoleKey.LeftArrow)
+
+                    if (displaySorted == true)
                     {
-                        index = index - 1 < 1 ? (int)Math.Ceiling(personsList.Count / System.Convert.ToDecimal(elementsAmount)) : index - 1;
+                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4, columns[selectedOption]);
+                    }
+                    else
+                    {
+                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
                     }
                 }
-                while (actionKey == ConsoleKey.LeftArrow || actionKey == ConsoleKey.RightArrow);
-
             }
             catch (InvalidOperationException ex)
             {
@@ -236,196 +495,6 @@ namespace ksiazkaZDanymi
                 Console.Clear();
             }
         }
-
-        private int SelectFromListMembers(int elementsAmount = 4)
-        {
-            Console.Clear();
-
-            ConsoleKey actionKey;
-
-            int index = 1;
-
-            int selectedPerson = 0;
-
-
-            try
-            {
-                FetchPersonsFromDatabase();
-
-                while (true)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Use {← and →} to navigate between sites and {↑ and ↓} to change selected user.\n Press any other key to exit.");
-
-                    for (int i = (index - 1) * elementsAmount; i < index * elementsAmount && i < personsList.Count; i++)
-                    {
-
-                        if (i == selectedPerson)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-
-                            Console.WriteLine(
-                            $"{personsList[i].ID}. {{ \n \t" +
-                            $"Name: {personsList[i].Name} \n \t" +
-                            $"Surname: {personsList[i].Surname} \n \t" +
-                            $"Phone Number: {personsList[i].PhoneNumber} \n \t" +
-                            $"Mail: {personsList[i].Email} \n \t" +
-                            $"Date of Birth: {personsList[i].DateOfBirth} \n" +
-                            $"}}");
-
-                            Console.ResetColor();
-                            continue;
-                        }
-
-                        Console.WriteLine(
-                        $"{personsList[i].ID}. {{ \n \t" +
-                        $"Name: {personsList[i].Name} \n \t" +
-                        $"Surname: {personsList[i].Surname} \n \t" +
-                        $"Phone Number: {personsList[i].PhoneNumber} \n \t" +
-                        $"Mail: {personsList[i].Email} \n \t" +
-                        $"Date of Birth: {personsList[i].DateOfBirth} \n" +
-                        $"}}");
-
-                    }
-
-                    actionKey = Console.ReadKey().Key;
-
-                    switch (actionKey)
-                    {
-                        case ConsoleKey.RightArrow:
-                            index = index + 1 > Math.Ceiling(personsList.Count / 4.0) ? 1 : index + 1;
-                            selectedPerson = (index - 1) * elementsAmount;
-                            continue;
-                        case ConsoleKey.LeftArrow:
-                            index = index - 1 < 1 ? (int)Math.Ceiling(personsList.Count / 4.0) : index - 1;
-                            selectedPerson = (index - 1) * elementsAmount;
-                            continue;
-                        case ConsoleKey.UpArrow:
-                            selectedPerson = selectedPerson + 1 >= index * elementsAmount || selectedPerson + 1 >= personsList.Count ? (index - 1) * elementsAmount : selectedPerson + 1;
-                            continue;
-                        case ConsoleKey.DownArrow:
-                            selectedPerson = selectedPerson - 1 < (index - 1) * elementsAmount ? index * elementsAmount - 1 : selectedPerson - 1;
-                            if (selectedPerson > personsList.Count)
-                            {
-                                selectedPerson = personsList.Count - 1;
-                            }
-                            continue;
-                        case ConsoleKey.Enter:
-                            Console.Clear();
-                            commandHolder.Parameters.Clear();
-
-                            return personsList[selectedPerson].ID;
-                        default:
-                            return -1;
-                    }
-
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                Console.Clear();
-            }
-
-        }
-
-
-        private Dictionary<string, string> GetValidatedUserInput()
-        {
-            Dictionary<string, string> userInputs = new Dictionary<string, string>();
-
-            string nameSurnameValidationPattern = "^[A-Z][a-z]+(?:\\s[A-Z][a-z]+)*$";
-            Regex nameSurnameValidation = new Regex(nameSurnameValidationPattern);
-
-            string dateValidationPattern = "^(?:\\d{4}[-/]\\d{2}[-/]\\d{2})$";
-            Regex dateValidation = new Regex(dateValidationPattern);
-
-            while (true)
-            {
-                try
-                {
-                    if (!userInputs.ContainsKey("name"))
-                    {
-                        Console.WriteLine("Enter new user name: ");
-                        userInputs["name"] = Console.ReadLine();
-                        if (!nameSurnameValidation.IsMatch(userInputs["name"]))
-                        {
-                            userInputs.Remove("name");
-                            throw new ValidationException("Field 'name' must be a correctly provided string. Only letters are allowed.");
-                        }
-                    }
-
-                    if (!userInputs.ContainsKey("surname"))
-                    {
-                        Console.WriteLine("Enter new user surname: ");
-                        userInputs["surname"] = Console.ReadLine();
-                        if (!nameSurnameValidation.IsMatch(userInputs["surname"]))
-                        {
-                            userInputs.Remove("surname");
-                            throw new ValidationException("Field 'surname' must be a correctly provided string. Only letters are allowed.");
-                        }
-                    }
-
-                    if (!userInputs.ContainsKey("phone_number"))
-                    {
-                        Console.WriteLine("Enter new user phone number (eg. 222-222-222): ");
-                        userInputs["phone_number"] = Console.ReadLine();
-                        if (!new PhoneAttribute().IsValid(userInputs["phone_number"]) || !new StringLengthAttribute(12).IsValid(userInputs["phone_number"]))
-                        {
-                            userInputs.Remove("phone_number");
-                            throw new ValidationException("Field 'phone_number' must be a correctly provided string. Only numbers and separators are allowed.");
-                        }
-                    }
-
-                    if (!userInputs.ContainsKey("mail"))
-                    {
-                        Console.WriteLine("Enter new user mail: ");
-                        userInputs["mail"] = Console.ReadLine();
-                        if (!new EmailAddressAttribute().IsValid(userInputs["mail"]))
-                        {
-                            userInputs.Remove("mail");
-                            throw new ValidationException("Field 'mail' must be a correctly provided mail format.");
-                        }
-                    }
-
-                    if (!userInputs.ContainsKey("date_of_birth"))
-                    {
-                        Console.WriteLine("Enter new user birth date (eg. 2012-02-12): ");
-                        userInputs["date_of_birth"] = Console.ReadLine();
-                        if (!dateValidation.IsMatch(userInputs["date_of_birth"]))
-                        {
-                            userInputs.Remove("date_of_birth");
-                            throw new ValidationException("Field 'dateOfBirth' must be a correctly provided date format eg. (YYYY-MM-DD or YYYY/MM/DD).");
-                        }
-                    }
-
-                    break;
-                }
-                catch (ValidationException ex)
-                {
-                    Console.WriteLine("Some provided data are incorrect: " + ex.Message);
-                    Console.WriteLine("Enter this field again.");
-                    Console.WriteLine("Press any button to continue.");
-                    Console.ReadKey();
-                    Console.Clear();
-                    continue;
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
-
-            return userInputs;
-        }
-
         private void AddToList()
         {
             Console.Clear();
@@ -459,25 +528,19 @@ namespace ksiazkaZDanymi
                 commandHolder.Parameters.Clear();
             }
         }
-
         private void DeleteFromList()
         {
             Console.Clear();
 
             int personToDelete;
 
-            ConsoleKey actionKey;
-
-
 
             int selectedOption = 0;
-
-            string[] options = { "YES", "NO" };
-
+            List<string> options = new List<string> { "YES", "NO" };
+            List<string> communicates = new List<string>();
 
             try
             {
-                FetchPersonsFromDatabase();
 
                 while (true)
                 {
@@ -490,73 +553,33 @@ namespace ksiazkaZDanymi
                         return;
                     }
 
-                    while (true)
+                    communicates.Add($"Are you sure you want to delete user with ID: {personToDelete}");
+
+                    selectedOption = SelectFromGivenOptions(options, communicates);
+
+                    switch(selectedOption)
                     {
-                        Console.Clear();
-                        Console.WriteLine("Use {↑ and ↓} to change selected option.\n Press any other key to exit.");
-
-                        Console.WriteLine($"Are you sure you want to delete user with ID: {personToDelete}");
-
-                        for (int i = 0; i < options.Length; i++)
-                        {
-                            if (i == selectedOption)
+                        case 0:
+                            try
                             {
-                                Console.ForegroundColor = ConsoleColor.Green;
-
-                                Console.WriteLine(options[i]);
-
-                                Console.ResetColor();
-                                continue;
+                                commandHolder.CommandText = "DELETE FROM Persons WHERE person_id = @person_id";
+                                commandHolder.Parameters.AddWithValue("@person_id", personToDelete);
+                                commandHolder.ExecuteNonQuery();
                             }
-
-                            Console.WriteLine(options[i]);
-                        }
-
-                        actionKey = Console.ReadKey().Key;
-
-                        switch (actionKey)
-                        {
-                            case ConsoleKey.DownArrow:
-                                selectedOption = selectedOption + 1 >= options.Length ? 0 : selectedOption + 1;
-                                continue;
-                            case ConsoleKey.UpArrow:
-                                selectedOption = selectedOption - 1 < 0 ? options.Length - 1 : selectedOption - 1;
-                                continue;
-                            case ConsoleKey.Enter:
-                                if (selectedOption == 0)
-                                {
-                                    try
-                                    {
-                                        commandHolder.CommandText = "DELETE FROM Persons WHERE person_id = @person_id";
-                                        commandHolder.Parameters.AddWithValue("@person_id", personToDelete);
-                                        commandHolder.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine("An error occurred while deleting the user: " + ex.Message);
-                                        Console.WriteLine("Press any key to continue.");
-                                        Console.ReadKey();
-                                        return;
-                                    }
-
-                                }
-                                else
-                                {
-                                    commandHolder.Parameters.Clear();
-                                    Console.Clear();
-                                    return;
-                                }
-
-                                break;
-                            default:
-                                commandHolder.Parameters.Clear();
-                                Console.Clear();
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("An error occurred while deleting the user: " + ex.Message);
+                                Console.WriteLine("Press any key to continue.");
+                                Console.ReadKey();
                                 return;
-                        }
-
+                            }
                         break;
+                        case 1:
+                            commandHolder.Parameters.Clear();
+                            Console.Clear();
+                            return;
                     }
-
+                        
                     Console.WriteLine("User deleted. Do you want to delete another? Press Y for Yes, any other key to exit.");
 
                     commandHolder.Parameters.Clear();
@@ -584,22 +607,19 @@ namespace ksiazkaZDanymi
 
 
         }
-
         private void ModifyListMember()
         {
             Console.Clear();
 
             int personToModify;
 
-            ConsoleKey actionKey;
-
 
             Dictionary<string, string> userInputs;
 
 
             int selectedOption = 0;
-
-            string[] options = { "YES", "NO" };
+            List<string> options = new List<string> { "YES", "NO" };
+            List<string> communicates = new List<string>();
 
             try
             {
@@ -616,78 +636,38 @@ namespace ksiazkaZDanymi
 
                     userInputs = GetValidatedUserInput();
 
-                    while (true)
+                    communicates.Add($"Are you sure you want to modify user with ID: {personToModify}");
+
+                    selectedOption = SelectFromGivenOptions(options, communicates);
+
+                    switch (selectedOption)
                     {
-                        Console.Clear();
-                        Console.WriteLine("Use {↑ and ↓} to change selected option.\n Press any other key to exit.");
-
-                        Console.WriteLine($"Are you sure you want to modify data of user with ID: {personToModify}");
-
-                        for (int i = 0; i < options.Length; i++)
-                        {
-                            if (i == selectedOption)
+                        case 0:
+                            try
                             {
-                                Console.ForegroundColor = ConsoleColor.Green;
+                                commandHolder.CommandText = $"UPDATE Persons SET name = @name, surname = @surname, phone_number = @phone_number, mail = @mail, date_of_birth = @date_of_birth WHERE person_id = @personID";
 
-                                Console.WriteLine(options[i]);
+                                commandHolder.Parameters.AddWithValue("@personID", personToModify);
+                                commandHolder.Parameters.AddWithValue("@name", userInputs["name"]);
+                                commandHolder.Parameters.AddWithValue("@surname", userInputs["surname"]);
+                                commandHolder.Parameters.AddWithValue("@phone_number", userInputs["phone_number"]);
+                                commandHolder.Parameters.AddWithValue("@mail", userInputs["mail"]);
+                                commandHolder.Parameters.AddWithValue("@date_of_birth", userInputs["date_of_birth"]);
 
-                                Console.ResetColor();
-                                continue;
+                                commandHolder.ExecuteNonQuery();
                             }
-
-                            Console.WriteLine(options[i]);
-                        }
-
-                        actionKey = Console.ReadKey().Key;
-
-                        switch (actionKey)
-                        {
-                            case ConsoleKey.DownArrow:
-                                selectedOption = selectedOption + 1 >= options.Length ? 0 : selectedOption + 1;
-                                continue;
-                            case ConsoleKey.UpArrow:
-                                selectedOption = selectedOption - 1 < 0 ? options.Length - 1 : selectedOption - 1;
-                                continue;
-                            case ConsoleKey.Enter:
-                                if (selectedOption == 0)
-                                {
-                                    try
-                                    {
-                                        commandHolder.CommandText = $"UPDATE Persons SET name = @name, surname = @surname, phone_number = @phone_number, mail = @mail, date_of_birth = @date_of_birth WHERE person_id = @personID";
-
-                                        commandHolder.Parameters.AddWithValue("@personID", personToModify);
-                                        commandHolder.Parameters.AddWithValue("@name", userInputs["name"]);
-                                        commandHolder.Parameters.AddWithValue("@surname", userInputs["surname"]);
-                                        commandHolder.Parameters.AddWithValue("@phone_number", userInputs["phone_number"]);
-                                        commandHolder.Parameters.AddWithValue("@mail", userInputs["mail"]);
-                                        commandHolder.Parameters.AddWithValue("@date_of_birth", userInputs["date_of_birth"]);
-
-                                        commandHolder.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine("An error occurred while modyfying the user: " + ex.Message);
-                                        Console.WriteLine("Press any key to continue.");
-                                        Console.ReadKey();
-                                        return;
-                                    }
-
-                                }
-                                else
-                                {
-                                    commandHolder.Parameters.Clear();
-                                    Console.Clear();
-                                    return;
-                                }
-
-                                break;
-                            default:
-                                commandHolder.Parameters.Clear();
-                                Console.Clear();
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("An error occurred while modifying the user: " + ex.Message);
+                                Console.WriteLine("Press any key to continue.");
+                                Console.ReadKey();
                                 return;
-                        }
-
-                        break;
+                            }
+                            break;
+                        case 1:
+                            commandHolder.Parameters.Clear();
+                            Console.Clear();
+                            return;
                     }
 
                     Console.WriteLine("User modified. Do you want to modify another person data? Press Y for Yes, any other key to exit.");
@@ -715,62 +695,34 @@ namespace ksiazkaZDanymi
                 Console.Clear();
             }
         }
-
         private void ShowMenu()
         {
-            ConsoleKey actionKey;
-
-
             int selectedOption = 0;
 
-            string[] options = { "Delete user (selectable)", "Add new user", "Display all users", "Modify user (selectable)", "Sort users (selectable)", "Terminate the program" };
+            List<string> options = new List<string> 
+            { 
+                "Delete user (selectable)", 
+                "Add new user", 
+                "Display all users", 
+                "Modify user (selectable)", 
+                "Sort users (selectable)", 
+                "Terminate the program" 
+            };
 
+            List<string> communicates = new List<string>
+            {
+                "Welcome to the program 'Phone Book'.",
+                "This is simple utility working on MariaDB which provides methods to perform particular operations on records concerned persons in database.",
+                "Choose what you want to do by selecting option from the list below.",
+            };
 
             while (true)
             {
                 try
                 {
-                    while (true)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Welcome to the program 'Phone Book'. \nThis is simple utility working on MariaDB which provides methods to perform particular operations on records concerned persons in database.");
-                        Console.WriteLine("Choose what you want to do by selecting option from the list below.");
-                        Console.WriteLine("Use {↑ and ↓} to change selected option, ENTER to choose.");
-                        Console.WriteLine();
+                    Console.Clear();
 
-                        for (int i = 0; i < options.Length; i++)
-                        {
-                            if (i == selectedOption)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Green;
-
-                                Console.WriteLine(" > " + options[i]);
-
-                                Console.ResetColor();
-                                continue;
-                            }
-
-                            Console.WriteLine(options[i]);
-                        }
-
-                        actionKey = Console.ReadKey().Key;
-
-                        switch (actionKey)
-                        {
-                            case ConsoleKey.DownArrow:
-                                selectedOption = selectedOption + 1 >= options.Length ? 0 : selectedOption + 1;
-                                continue;
-                            case ConsoleKey.UpArrow:
-                                selectedOption = selectedOption - 1 < 0 ? options.Length - 1 : selectedOption - 1;
-                                continue;
-                            case ConsoleKey.Enter:
-                                break;
-                            default:
-                                continue;
-                        }
-
-                        break;
-                    }
+                    selectedOption = SelectFromGivenOptions(options, communicates);
 
                     switch (selectedOption)
                     {
@@ -790,13 +742,12 @@ namespace ksiazkaZDanymi
                             DisplayListMembers(true);
                             break;
                         case 5:
+                        case -1:
                             Console.WriteLine("End of the program.");
                             return;
-                        default:
-                            Console.Clear();
-                            Console.WriteLine("Option you selected is not available.");
-                            break;
                     }
+
+                    Console.Clear();
 
                 }
                 catch (Exception ex)

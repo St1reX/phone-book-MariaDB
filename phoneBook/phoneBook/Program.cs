@@ -11,7 +11,7 @@ namespace phoneBook
     {
         static void Main(string[] args)
         {
-            PhoneBook f1 = new PhoneBook("PhoneBook.db");
+            PhoneBook f1 = new PhoneBook("PhoneBook");
         }
     }
 }
