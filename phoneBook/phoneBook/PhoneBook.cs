@@ -99,13 +99,13 @@ namespace ksiazkaZDanymi
                             index = index + 1 > Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) ? 1 : index + 1;
                             selectedPerson = 0;
 
-                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
+                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount);
                             continue;
                         case ConsoleKey.LeftArrow:
                             index = index - 1 < 1 ? (int)Math.Ceiling(recordsAmount / System.Convert.ToDecimal(elementsAmount)) : index - 1;
                             selectedPerson = 0;
 
-                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
+                            FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount);
                             continue;
                         case ConsoleKey.UpArrow:
                             selectedPerson = selectedPerson - 1 < 0 ? personsList.Count - 1 : selectedPerson - 1;
