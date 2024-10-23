@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SQLite;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using MySqlConnector;
 
@@ -142,20 +143,21 @@ namespace ksiazkaZDanymi
             }
 
         }
-        private int SelectFromGivenOptions(List<string> options, List<string> communicates)
+        private int SelectFromGivenOptions(List<string> options, List<string> comunicates)
         {
             int selectedOption = 0;
             ConsoleKey actionKey;
 
-            communicates.Add("Use {↑ and ↓} to change selected option, ENTER to choose.");
-            communicates.Add("Press ESC to exit.");
-            communicates.Add("\n");
+            var tmpCommunicates = comunicates.ToList();
+            tmpCommunicates.Add("Use {↑ and ↓} to change selected option, ENTER to choose.");
+            tmpCommunicates.Add("Press ESC to exit.");
+            tmpCommunicates.Add("\n");
 
             while (true)
             {
                 Console.Clear();
 
-                foreach (var communicate in communicates)
+                foreach (var communicate in tmpCommunicates)
                 {
                     Console.WriteLine(communicate);
                 }
@@ -178,8 +180,6 @@ namespace ksiazkaZDanymi
 
                 actionKey = Console.ReadKey().Key;
 
-                Console.Clear();
-
                 switch (actionKey)
                 {
                     case ConsoleKey.DownArrow:
@@ -189,8 +189,10 @@ namespace ksiazkaZDanymi
                         selectedOption = selectedOption - 1 < 0 ? options.Count - 1 : selectedOption - 1;
                         continue;
                     case ConsoleKey.Enter:
+                        tmpCommunicates.Clear();
                         return selectedOption;
                     case ConsoleKey.Escape:
+                        tmpCommunicates.Clear();
                         return -1;
                     default:
                         continue;
@@ -328,16 +330,36 @@ namespace ksiazkaZDanymi
             }
 
         }
-        private void FetchPersonsFromDatabase(int limit, int offset, string orderBy = null)
+        private void FetchPersonsFromDatabase(int limit, int offset, string orderBy = null, string searchTerm = null)
         {
             try
             {
                 personsList.Clear();
 
-                commandHolder.CommandText = orderBy == null ? $"SELECT * FROM Persons " : $"SELECT * FROM Persons ORDER BY {orderBy} ";
-                commandHolder.CommandText += $"LIMIT {limit} OFFSET {offset}";
-                var reader = commandHolder.ExecuteReader();
+                // FILTERING
+                if (searchTerm != null)
+                {
+                    commandHolder.CommandText =
+                    $"SELECT * FROM Persons WHERE " +
+                    $"name LIKE '%{searchTerm}%' " +
+                    $"OR surname LIKE '%{searchTerm}%' " +
+                    $"OR phone_number LIKE '%{searchTerm}%' " +
+                    $"OR mail LIKE '%{searchTerm}%' " +
+                    $"OR date_of_birth LIKE '%{searchTerm}%' ";
+                }
+                else
+                {
+                    commandHolder.CommandText = "SELECT * FROM Persons";
+                }
 
+                // SORTING
+                commandHolder.CommandText += orderBy == null ? "" : $" ORDER BY {orderBy} ";
+
+                // LIMITS & OFFSETS
+                commandHolder.CommandText += $" LIMIT {limit} OFFSET {offset}";
+
+
+                var reader = commandHolder.ExecuteReader();
                 while (reader.Read())
                 {
                     personsList.Add(Person.CreateUser(
@@ -359,81 +381,79 @@ namespace ksiazkaZDanymi
 
             if (personsList.Count == 0)
             {
-                throw new InvalidOperationException("Table Persons in database are empty. No elements to select/display. You need to add at least one user before using this function.");
+                if (searchTerm != null)
+                {
+                    throw new InvalidOperationException("No records were found. This could mean that the database is empty or no records match your search criteria.");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Table Persons in database are empty. No elements to select/display. You need to add at least one user before using this function.");
+                }
             }
         }
-        private void DisplayListMembers(bool displaySorted = false, int elementsAmount = 4)
+        private void DisplayListMembers(bool displaySorted = false, bool filterRecords = false, int elementsAmount = 4)
         {
             Console.Clear();
 
             List<string> columns = new List<string>();
+            List<string> sortingCommunicates = new List<string>
+            {
+                "Select the column by which the records should be sorted."
+            };
             int selectedOption = 0;
 
-            ConsoleKey actionKey;
 
+            string filterPrompt = "";
+
+
+            ConsoleKey actionKey;
             int index = 1;
 
             try
             {
-                FetchPersonsFromDatabase(elementsAmount, 0);
+                //UPDATING RECORDS AMOUNT
+                commandHolder.CommandText = "SELECT COUNT(*) FROM Persons";
+                recordsAmount = System.Convert.ToInt32(commandHolder.ExecuteScalar());
 
                 if (displaySorted == true)
                 {
 
                     commandHolder.Parameters.Clear();
-                    commandHolder.CommandText = "SHOW COLUMNS FROM Persons";
+                    commandHolder.CommandText = "PRAGMA table_info(Persons)";
                     var reader = commandHolder.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        columns.Add(reader["Field"].ToString());
+                        columns.Add(reader["name"].ToString());
                     }
 
                     reader.Close();
 
-                    while (true)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Select the column by which the records should be sorted.");
-                        Console.WriteLine("Use {↑ and ↓} to change selected option, ENTER to choose. Press any other key to exit.");
-                        Console.WriteLine();
+                    selectedOption = SelectFromGivenOptions(columns, sortingCommunicates);
 
-                        for (int i = 0; i < columns.Count; i++)
-                        {
-                            if (i == selectedOption)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Green;
+                    FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount, columns[selectedOption]);
+                }
+                else if (filterRecords == true)
+                {
+                    Console.WriteLine("Let's filter records. \nEnter your prompt: ");
 
-                                Console.WriteLine(" > " + columns[i]);
+                    filterPrompt = Console.ReadLine();
 
-                                Console.ResetColor();
-                                continue;
-                            }
+                    //UPDATING RECORDS AMOUNT WHILE FILTERING
+                    commandHolder.CommandText = "SELECT COUNT(*) FROM Persons WHERE " +
+                    $"name LIKE '%{filterPrompt}%' " +
+                    $"OR surname LIKE '%{filterPrompt}%' " +
+                    $"OR phone_number LIKE '%{filterPrompt}%' " +
+                    $"OR mail LIKE '%{filterPrompt}%' " +
+                    $"OR date_of_birth LIKE '%{filterPrompt}%' ";
 
-                            Console.WriteLine(columns[i]);
-                        }
+                    recordsAmount = System.Convert.ToInt32(commandHolder.ExecuteScalar());
 
-                        actionKey = Console.ReadKey().Key;
-
-                        switch (actionKey)
-                        {
-                            case ConsoleKey.DownArrow:
-                                selectedOption = selectedOption + 1 >= columns.Count ? 0 : selectedOption + 1;
-                                continue;
-                            case ConsoleKey.UpArrow:
-                                selectedOption = selectedOption - 1 < 0 ? columns.Count - 1 : selectedOption - 1;
-                                continue;
-                            case ConsoleKey.Enter:
-                                commandHolder.Parameters.Clear();
-                                break;
-                            default:
-                                commandHolder.Parameters.Clear();
-                                Console.Clear();
-                                return;
-                        }
-
-                        break;
-                    }
+                    FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount, searchTerm: filterPrompt);
+                }
+                else
+                {
+                    FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount);
                 }
 
                 while (true)
@@ -472,11 +492,15 @@ namespace ksiazkaZDanymi
 
                     if (displaySorted == true)
                     {
-                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4, columns[selectedOption]);
+                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount, columns[selectedOption]);
+                    }
+                    else if (filterRecords == true)
+                    {
+                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount, searchTerm: filterPrompt);
                     }
                     else
                     {
-                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * 4);
+                        FetchPersonsFromDatabase(elementsAmount, (index - 1) * elementsAmount);
                     }
                 }
             }
@@ -486,9 +510,11 @@ namespace ksiazkaZDanymi
                 Console.WriteLine("Press any key to continue.");
                 Console.ReadKey();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Console.WriteLine("Error occured while displaying users: " + ex.Message);
+                Console.WriteLine("Press any key to continue.");
+                Console.ReadKey();
             }
             finally
             {
@@ -699,28 +725,28 @@ namespace ksiazkaZDanymi
         {
             int selectedOption = 0;
 
-            List<string> options = new List<string> 
-            { 
-                "Delete user (selectable)", 
-                "Add new user", 
-                "Display all users", 
-                "Modify user (selectable)", 
-                "Sort users (selectable)", 
-                "Terminate the program" 
+            List<string> options = new List<string>
+            {
+                "Delete record (selectable)",
+                "Add record",
+                "Display all users",
+                "Modify record (selectable)",
+                "Sort records (selectable)",
+                "Filter records (prompt)",
+                "Terminate the program"
             };
 
             List<string> communicates = new List<string>
             {
                 "Welcome to the program 'Phone Book'.",
                 "This is simple utility working on MariaDB which provides methods to perform particular operations on records concerned persons in database.",
-                "Choose what you want to do by selecting option from the list below.",
+                "Choose what you want to do by selecting option from the list below."
             };
 
             while (true)
             {
                 try
                 {
-                    Console.Clear();
 
                     selectedOption = SelectFromGivenOptions(options, communicates);
 
@@ -739,15 +765,16 @@ namespace ksiazkaZDanymi
                             ModifyListMember();
                             break;
                         case 4:
-                            DisplayListMembers(true);
+                            DisplayListMembers(displaySorted: true);
                             break;
                         case 5:
+                            DisplayListMembers(filterRecords: true);
+                            break;
+                        case 6:
                         case -1:
                             Console.WriteLine("End of the program.");
                             return;
                     }
-
-                    Console.Clear();
 
                 }
                 catch (Exception ex)
