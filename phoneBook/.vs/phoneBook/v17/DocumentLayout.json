@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|c:\\users\\uryga\\documents\\github\\phone-book-mariadb\\phonebook\\phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\phonebook.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|c:\\users\\uryga\\documents\\github\\phone-book-mariadb\\phonebook\\phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2ECE3405-FE2E-4227-957A-9CC00C0CE70E}|phoneBook\\phoneBook.csproj|solutionrelative:phonebook\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,11 +22,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Program.cs",
               "RelativeDocumentMoniker": "phoneBook\\Program.cs",
@@ -34,24 +34,25 @@
               "RelativeToolTip": "phoneBook\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-10T07:19:22.317Z"
+              "WhenOpened": "2024-10-10T07:19:22.317Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "PhoneBook.cs",
               "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\PhoneBook.cs",
               "RelativeDocumentMoniker": "phoneBook\\PhoneBook.cs",
               "ToolTip": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\PhoneBook.cs",
               "RelativeToolTip": "phoneBook\\PhoneBook.cs",
-              "ViewState": "AgIAAIkBAAAAAAAAAAA9wJEAAABaAAAAAAAAAA==",
+              "ViewState": "AgIAABYAAAAAAAAAAAAAAK8AAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-10T07:19:21.909Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Person.cs",
               "DocumentMoniker": "C:\\Users\\uryga\\Documents\\GitHub\\phone-book-MariaDB\\phoneBook\\phoneBook\\Person.cs",
               "RelativeDocumentMoniker": "phoneBook\\Person.cs",
